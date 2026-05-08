@@ -65,7 +65,7 @@ export const checkpointsService = {
   async getAll(): Promise<Checkpoint[]> {
     const response = await apiClient.get<CheckpointListApiResponse>(
       CHECKPOINTS_ENDPOINT,
-      { params: { page: 1, limit: 1000 } },
+      { params: { page: 1, limit: 10 } },
     );
     return response.data.data;
   },
