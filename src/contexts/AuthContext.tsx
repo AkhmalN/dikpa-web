@@ -1,10 +1,16 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
 import { useNavigate } from "react-router-dom";
-import type { User, LoginPayload } from "@/types";
+import type { AuthUser, LoginPayload } from "@/types";
 import { authService } from "@/services/auth.service";
 
 interface AuthContextValue {
-  user: User | null;
+  user: AuthUser | null;
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -15,7 +21,7 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
@@ -42,17 +48,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener("auth:logout", handleAuthLogout);
   }, [logout]);
 
-  const login = useCallback(async (payload: LoginPayload) => {
-    const { tokens, user: userData } = await authService.login(payload);
-    localStorage.setItem("access_token", tokens.access_token);
-    localStorage.setItem("user", JSON.stringify(userData));
-    setToken(tokens.access_token);
-    setUser(userData);
-    navigate("/dashboard", { replace: true });
-  }, [navigate]);
+  const login = useCallback(
+    async (payload: LoginPayload) => {
+      const { tokens, user: userData } = await authService.login(payload);
+      localStorage.setItem("access_token", tokens.access_token);
+      localStorage.setItem("user", JSON.stringify(userData));
+      setToken(tokens.access_token);
+      setUser(userData);
+      navigate("/dashboard", { replace: true });
+    },
+    [navigate],
+  );
 
   return (
-    <AuthContext.Provider value={{ user, token, isAuthenticated: !!token, isLoading, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        isAuthenticated: !!token,
+        isLoading,
+        login,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

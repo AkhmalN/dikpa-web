@@ -1,19 +1,11 @@
 import { useCallback, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { ColumnDef } from "@tanstack/react-table";
 import { format, parseISO } from "date-fns";
 import { id as localeId } from "date-fns/locale";
-import { Edit, Eye, MoreHorizontal, Trash2 } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { z } from "zod";
-import { StatusBadge } from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Select,
   SelectContent,
@@ -21,7 +13,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Assignment, AssignmentStatus } from "@/types";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import type { Assignment, AssignmentStatus, Period } from "@/types";
 import {
   useAssignmentCheckpointsQuery,
   useAssignmentsQuery,
@@ -29,22 +26,31 @@ import {
   useDeleteAssignmentMutation,
   useUpdateAssignmentMutation,
 } from "@/hooks/use-assigment-query";
+import { useAssignmentColumns } from "./columns";
+import { useShiftsQuery } from "@/hooks/use-shift.query";
+import { useUsersQuery } from "@/hooks/use-user-query";
+import { Calendar } from "@/components/ui/calendar";
 
-const STATUS_LABELS: Record<
+export const ASSIGMENT_STATUS_LABEL: Record<
   AssignmentStatus,
   { label: string; className: string }
 > = {
-  active: {
+  ACTIVE: {
     label: "Aktif",
     className:
       "bg-[rgba(0,201,81,0.15)] text-[#00C951] border-[rgba(0,201,81,0.3)]",
   },
-  inactive: {
-    label: "Nonaktif",
+  PENDING: {
+    label: "Menunggu",
     className:
-      "bg-[rgba(82,82,82,0.1)] text-[#525252] border-[rgba(82,82,82,0.2)]",
+      "bg-[rgba(255,193,7,0.15)] text-[#FFC107] border-[rgba(255,193,7,0.3)]",
   },
-  completed: {
+  CANCELLED: {
+    label: "Dibatalkan",
+    className:
+      "bg-[rgba(220,53,69,0.15)] text-[#DC3545] border-[rgba(220,53,69,0.3)]",
+  },
+  COMPLETED: {
     label: "Selesai",
     className:
       "bg-[rgba(0,184,219,0.15)] text-[#00B8DB] border-[rgba(0,184,219,0.3)]",
@@ -54,10 +60,11 @@ const STATUS_LABELS: Record<
 const schema = z.object({
   user_id: z.string().min(1, "User wajib dipilih"),
   shift_id: z.string().min(1, "Shift wajib dipilih"),
+  duty_date: z.string().min(1, "Tanggal tugas wajib dipilih"),
   assigned_checkpoint_ids: z
     .array(z.string())
     .min(1, "Pilih minimal 1 checkpoint"),
-  status: z.enum(["active", "inactive", "completed"]),
+  status: z.enum(["PENDING", "ACTIVE", "CANCELLED", "COMPLETED"]),
   notes: z.string().optional(),
 });
 
@@ -69,24 +76,11 @@ const PER_PAGE = 10;
 const DEFAULT_ASSIGNMENT_FORM_VALUES: FormData = {
   user_id: "",
   shift_id: "",
+  duty_date: "",
   assigned_checkpoint_ids: [],
-  status: "active",
+  status: "PENDING",
   notes: "",
 };
-
-const MOCK_USERS = [
-  { id: "u1", name: "Joko Widodo" },
-  { id: "u2", name: "Siti Rahayu" },
-  { id: "u3", name: "Bambang Sutrisno" },
-  { id: "u4", name: "Dewi Lestari" },
-  { id: "u5", name: "Hendra Gunawan" },
-];
-
-const MOCK_SHIFTS = [
-  { id: "s1", shift_name: "Shift Pagi (06:00-14:00)" },
-  { id: "s2", shift_name: "Shift Siang (14:00-22:00)" },
-  { id: "s3", shift_name: "Shift Malam (22:00-06:00)" },
-];
 
 function getAssignmentDetailRows(assignment: Assignment) {
   return [
@@ -104,12 +98,12 @@ function getAssignmentDetailRows(assignment: Assignment) {
     },
     {
       label: "Status",
-      value: STATUS_LABELS[assignment.status]?.label,
+      value: ASSIGMENT_STATUS_LABEL[assignment.status]?.label,
     },
     { label: "Catatan", value: assignment.notes || "—" },
     {
       label: "Dibuat",
-      value: format(parseISO(assignment.created_at), "dd MMM yyyy, HH:mm", {
+      value: format(parseISO(assignment.createdAt), "dd MMM yyyy, HH:mm", {
         locale: localeId,
       }),
     },
@@ -119,7 +113,11 @@ function getAssignmentDetailRows(assignment: Assignment) {
 export function useAssigmentPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<AssignmentStatus | "all">(
+    "all",
+  );
+  const [periodFilter, setPeriodFilter] = useState<Period>("daily");
+  const [dutyDate, setDutyDate] = useState<Date | undefined>(undefined);
   const [modalMode, setModalMode] = useState<ModalMode>(null);
   const [selected, setSelected] = useState<Assignment | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Assignment | null>(null);
@@ -129,8 +127,35 @@ export function useAssigmentPage() {
     perPage: PER_PAGE,
     search,
     statusFilter,
+    period: periodFilter,
+    dutyDate: dutyDate ? format(dutyDate, "yyyy-MM-dd") : undefined,
   });
+
   const checkpointsQuery = useAssignmentCheckpointsQuery();
+
+  const shiftsQuery = useShiftsQuery({
+    page: 0,
+    perPage: 100,
+    search: "",
+  });
+
+  const usersQuery = useUsersQuery({
+    page: 0,
+    perPage: 100,
+    search: "",
+  });
+
+  const columns = useAssignmentColumns({
+    openDetail: (assignment) => {
+      setSelected(assignment);
+      setModalMode("detail");
+    },
+    openEdit: (assignment) => {
+      setSelected(assignment);
+      setModalMode("edit");
+    },
+    setDeleteTarget,
+  });
 
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -170,6 +195,7 @@ export function useAssigmentPage() {
       reset({
         user_id: assignment.user_id,
         shift_id: assignment.shift_id,
+        duty_date: assignment.duty_date ?? "",
         assigned_checkpoint_ids: assignment.assigned_checkpoint_ids,
         status: assignment.status,
         notes: assignment.notes ?? "",
@@ -180,11 +206,6 @@ export function useAssigmentPage() {
     [reset],
   );
 
-  const openDetail = useCallback((assignment: Assignment) => {
-    setSelected(assignment);
-    setModalMode("detail");
-  }, []);
-
   const onSubmit = useCallback(
     (data: FormData) => {
       if (modalMode === "create") {
@@ -193,7 +214,7 @@ export function useAssigmentPage() {
       }
 
       if (modalMode === "edit" && selected) {
-        updateMutation.mutate({ id: selected.id, payload: data });
+        updateMutation.mutate({ id: selected._id, payload: data });
       }
     },
     [modalMode, selected, createMutation, updateMutation],
@@ -215,114 +236,90 @@ export function useAssigmentPage() {
     [setValue, watchedCheckpoints],
   );
 
-  const columns = useMemo<ColumnDef<Assignment>[]>(
-    () => [
-      {
-        accessorKey: "user_name",
-        header: "Petugas",
-        cell: ({ row }) => (
-          <span className="font-medium text-foreground">
-            {row.original.user_name || "—"}
-          </span>
-        ),
-      },
-      {
-        accessorKey: "shift_name",
-        header: "Shift",
-        cell: ({ row }) => (
-          <span className="text-[13px] text-muted-foreground">
-            {row.original.shift_name || "—"}
-          </span>
-        ),
-      },
-      {
-        id: "checkpoints_count",
-        header: "Checkpoint",
-        cell: ({ row }) => (
-          <span className="text-[13px] font-medium">
-            {row.original.assigned_checkpoint_ids.length} titik
-          </span>
-        ),
-      },
-      {
-        accessorKey: "status",
-        header: "Status",
-        cell: ({ row }) => (
-          <StatusBadge status={row.original.status} labels={STATUS_LABELS} />
-        ),
-      },
-      {
-        accessorKey: "notes",
-        header: "Catatan",
-        cell: ({ row }) => (
-          <span className="text-[13px] text-muted-foreground truncate max-w-[160px] block">
-            {row.original.notes || "—"}
-          </span>
-        ),
-      },
-      {
-        accessorKey: "created_at",
-        header: "Dibuat",
-        cell: ({ row }) => (
-          <span className="text-muted-foreground text-[13px]">
-            {format(parseISO(row.original.created_at), "dd MMM yyyy", {
-              locale: localeId,
-            })}
-          </span>
-        ),
-      },
-      {
-        id: "actions",
-        header: "",
-        cell: ({ row }) => (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon-sm" className="h-7 w-7">
-                <MoreHorizontal className="size-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => openDetail(row.original)}>
-                <Eye className="size-4 mr-2" /> Detail
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => openEdit(row.original)}>
-                <Edit className="size-4 mr-2" /> Edit
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => setDeleteTarget(row.original)}
-                className="text-[#FB2C36] focus:text-[#FB2C36] focus:bg-[rgba(251,44,54,0.08)]"
-              >
-                <Trash2 className="size-4 mr-2" /> Hapus
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ),
-      },
-    ],
-    [openDetail, openEdit],
-  );
-
   const filterComponent = useMemo(
     () => (
-      <Select
-        value={statusFilter}
-        onValueChange={(value) => {
-          setStatusFilter(value);
-          setPage(0);
-        }}
-      >
-        <SelectTrigger className="w-36 h-9 text-[13px]">
-          <SelectValue placeholder="Semua Status" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">Semua Status</SelectItem>
-          <SelectItem value="active">Aktif</SelectItem>
-          <SelectItem value="inactive">Nonaktif</SelectItem>
-          <SelectItem value="completed">Selesai</SelectItem>
-        </SelectContent>
-      </Select>
+      <div className="flex flex-row gap-5 items-center">
+        <Select
+          value={statusFilter}
+          onValueChange={(value) => {
+            setStatusFilter(value as AssignmentStatus | "all");
+            setPage(0);
+          }}
+        >
+          <SelectTrigger className="w-36 h-9 text-[13px]">
+            <SelectValue placeholder="Semua Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Semua Status</SelectItem>
+            <SelectItem value="PENDING">Menunggu</SelectItem>
+            <SelectItem value="ACTIVE">Aktif</SelectItem>
+            <SelectItem value="CANCELLED">Dibatalkan</SelectItem>
+            <SelectItem value="COMPLETED">Selesai</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select
+          value={periodFilter}
+          onValueChange={(value) => {
+            setPeriodFilter(value as Period);
+            setPage(0);
+          }}
+        >
+          <SelectTrigger className="w-36 h-9 text-[13px]">
+            <SelectValue placeholder="Semua Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="daily">Harian</SelectItem>
+            <SelectItem value="weekly">Mingguan</SelectItem>
+            <SelectItem value="monthly">Bulanan</SelectItem>
+            <SelectItem value="yearly">Tahunan</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <div className="w-1 h-5 bg-slate-200 inline-block" />
+
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-56 h-9 justify-start text-left text-[13px] font-normal"
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {dutyDate
+                ? format(dutyDate, "dd MMM yyyy", { locale: localeId })
+                : "Pilih Tanggal Tugas"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={dutyDate}
+              onSelect={(date) => {
+                setDutyDate(date);
+                setPage(0);
+              }}
+              initialFocus
+            />
+            {dutyDate ? (
+              <div className="border-t p-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="h-8 w-full text-[12px]"
+                  onClick={() => {
+                    setDutyDate(undefined);
+                    setPage(0);
+                  }}
+                >
+                  Reset Tanggal
+                </Button>
+              </div>
+            ) : null}
+          </PopoverContent>
+        </Popover>
+      </div>
     ),
-    [statusFilter],
+    [statusFilter, periodFilter, dutyDate],
   );
 
   const detailRows = useMemo(
@@ -332,20 +329,21 @@ export function useAssigmentPage() {
 
   return {
     Controller,
-    MOCK_USERS,
-    MOCK_SHIFTS,
+    userData: usersQuery.data?.data ?? [],
     columns,
     control,
     errors,
     checkpoints: checkpointsQuery.data ?? [],
     watchedCheckpoints,
     data: assignmentsQuery.data?.data ?? [],
-    totalItems: assignmentsQuery.data?.total,
-    pageCount: assignmentsQuery.data?.total_pages ?? 1,
+    shiftData: shiftsQuery.data?.data ?? [],
+    totalItems: assignmentsQuery.data?.meta.total ?? 0,
+    pageCount: assignmentsQuery.data?.meta.totalPages ?? 1,
     page,
     perPage: PER_PAGE,
     search,
     statusFilter,
+    dutyDate,
     modalMode,
     selected,
     deleteTarget,
@@ -362,6 +360,7 @@ export function useAssigmentPage() {
     setDeleteTarget,
     toggleCheckpoint,
     handleSubmit: handleSubmit(onSubmit),
-    confirmDelete: () => deleteTarget && deleteMutation.mutate(deleteTarget.id),
+    confirmDelete: () =>
+      deleteTarget && deleteMutation.mutate(deleteTarget._id),
   };
 }

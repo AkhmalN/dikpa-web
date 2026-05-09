@@ -1,4 +1,4 @@
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit, Trash2, CalendarIcon } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { DataTable } from "@/components/shared/DataTable";
 import { FormModal } from "@/components/shared/FormModal";
@@ -22,6 +22,14 @@ import {
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAssigmentPage } from "./use-assigment-page";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format, parseISO } from "date-fns";
+import { id as localeId } from "date-fns/locale";
 
 export function AssignmentsPage() {
   const {
@@ -29,8 +37,8 @@ export function AssignmentsPage() {
     handleSubmit,
     errors,
     Controller,
-    MOCK_USERS,
-    MOCK_SHIFTS,
+    userData,
+    shiftData,
     columns,
     checkpoints,
     watchedCheckpoints,
@@ -79,12 +87,12 @@ export function AssignmentsPage() {
           data={data}
           isLoading={isLoading}
           totalItems={totalItems}
-          searchPlaceholder="Cari petugas atau shift..."
-          onSearchChange={(v) => {
-            setSearch(v);
-            setPage(0);
-          }}
-          searchValue={search}
+          // searchPlaceholder="Cari petugas atau shift..."
+          // onSearchChange={(v) => {
+          //   setSearch(v);
+          //   setPage(0);
+          // }}
+          // searchValue={search}
           filterComponent={filterComponent}
           pagination={{
             pageIndex: page,
@@ -108,7 +116,7 @@ export function AssignmentsPage() {
         submitLabel={modalMode === "create" ? "Simpan" : "Perbarui"}
         size="lg"
       >
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
           <Controller
             name="user_id"
             control={control}
@@ -125,8 +133,8 @@ export function AssignmentsPage() {
                     <SelectValue placeholder="Pilih petugas" />
                   </SelectTrigger>
                   <SelectContent>
-                    {MOCK_USERS.map((u) => (
-                      <SelectItem key={u.id} value={u.id}>
+                    {userData.map((u) => (
+                      <SelectItem key={u._id} value={u.user_id}>
                         {u.name}
                       </SelectItem>
                     ))}
@@ -156,9 +164,9 @@ export function AssignmentsPage() {
                     <SelectValue placeholder="Pilih shift" />
                   </SelectTrigger>
                   <SelectContent>
-                    {MOCK_SHIFTS.map((s) => (
-                      <SelectItem key={s.id} value={s.id}>
-                        {s.shift_name}
+                    {shiftData.map((s) => (
+                      <SelectItem key={s._id} value={s._id}>
+                        {`${s.shift_name} (${s.shift_start_time} - ${s.shift_end_time})`}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -166,6 +174,61 @@ export function AssignmentsPage() {
                 {errors.shift_id && (
                   <p className="text-[12px] text-[#FB2C36]">
                     {errors.shift_id.message}
+                  </p>
+                )}
+              </div>
+            )}
+          />
+
+          <Controller
+            name="duty_date"
+            control={control}
+            render={({ field }) => (
+              <div className="flex flex-col gap-1.5">
+                <Label>
+                  Tanggal Tugas <span className="text-[#FB2C36]">*</span>
+                </Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-9 w-full justify-start text-left text-[13px] font-normal"
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {field.value
+                        ? format(parseISO(field.value), "dd MMM yyyy", {
+                            locale: localeId,
+                          })
+                        : "Pilih Tanggal Tugas"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value ? parseISO(field.value) : undefined}
+                      onSelect={(date) => {
+                        field.onChange(date ? format(date, "yyyy-MM-dd") : "");
+                      }}
+                      initialFocus
+                    />
+                    {field.value ? (
+                      <div className="border-t p-2">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          className="h-8 w-full text-[12px]"
+                          onClick={() => field.onChange("")}
+                        >
+                          Reset Tanggal
+                        </Button>
+                      </div>
+                    ) : null}
+                  </PopoverContent>
+                </Popover>
+                {errors.duty_date && (
+                  <p className="text-[12px] text-[#FB2C36]">
+                    {errors.duty_date.message}
                   </p>
                 )}
               </div>
@@ -198,30 +261,6 @@ export function AssignmentsPage() {
               {errors.assigned_checkpoint_ids.message}
             </p>
           )}
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <Controller
-            name="status"
-            control={control}
-            render={({ field }) => (
-              <div className="flex flex-col gap-1.5">
-                <Label>
-                  Status <span className="text-[#FB2C36]">*</span>
-                </Label>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active">Aktif</SelectItem>
-                    <SelectItem value="inactive">Nonaktif</SelectItem>
-                    <SelectItem value="completed">Selesai</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-          />
         </div>
 
         <Controller

@@ -1,12 +1,17 @@
 // import { apiClient } from "@/lib/axios"; // TODO: uncomment when backend is ready
-import type { LoginPayload, AuthTokens, User } from "@/types";
+import type { LoginPayload, AuthTokens, AuthUser } from "@/types";
 
 // TODO: Replace mock with real API call when backend is ready
 export const authService = {
-  async login(payload: LoginPayload): Promise<{ tokens: AuthTokens; user: User }> {
+  async login(
+    payload: LoginPayload,
+  ): Promise<{ tokens: AuthTokens; user: AuthUser }> {
     // MOCK: Simulates successful login for demo
     await new Promise((r) => setTimeout(r, 800));
-    if (payload.email === "admin@smartpatrol.com" && payload.password === "password") {
+    if (
+      payload.email === "admin@smartpatrol.com" &&
+      payload.password === "password"
+    ) {
       return {
         tokens: { access_token: "mock-access-token-tenant-admin" },
         user: {
@@ -17,7 +22,10 @@ export const authService = {
         },
       };
     }
-    if (payload.email === "supervisor@smartpatrol.com" && payload.password === "password") {
+    if (
+      payload.email === "supervisor@smartpatrol.com" &&
+      payload.password === "password"
+    ) {
       return {
         tokens: { access_token: "mock-access-token-supervisor" },
         user: {
@@ -37,7 +45,7 @@ export const authService = {
     await new Promise((r) => setTimeout(r, 100));
   },
 
-  async me(): Promise<User> {
+  async me(): Promise<AuthUser> {
     // Real API: return apiClient.get("/auth/me").then(r => r.data);
     const user = localStorage.getItem("user");
     if (user) return JSON.parse(user);

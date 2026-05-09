@@ -2,13 +2,15 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { assignmentsService } from "@/services/assignments.service";
 import { checkpointsService } from "@/services/checkpoints.service";
-import type { AssignmentPayload, AssignmentStatus } from "@/types";
+import type { AssignmentPayload, AssignmentStatus, Period } from "@/types";
 
 type AssignmentListFilters = {
   page: number;
   perPage: number;
   search: string;
   statusFilter: string;
+  period: Period;
+  dutyDate?: string;
 };
 
 type MutationHookOptions = {
@@ -17,8 +19,23 @@ type MutationHookOptions = {
 
 export const assignmentQueryKeys = {
   all: ["assignments"] as const,
-  list: ({ page, perPage, search, statusFilter }: AssignmentListFilters) =>
-    ["assignments", page, perPage, search.trim(), statusFilter] as const,
+  list: ({
+    page,
+    perPage,
+    search,
+    statusFilter,
+    period,
+    dutyDate,
+  }: AssignmentListFilters) =>
+    [
+      "assignments",
+      page,
+      perPage,
+      search.trim(),
+      statusFilter,
+      period,
+      dutyDate ?? "",
+    ] as const,
   checkpoints: ["checkpoints-all"] as const,
 };
 
@@ -28,11 +45,10 @@ export function useAssignmentsQuery(filters: AssignmentListFilters) {
     queryFn: () =>
       assignmentsService.getList({
         page: filters.page + 1,
-        per_page: filters.perPage,
-        search: filters.search.trim(),
-        ...(filters.statusFilter !== "all"
-          ? { status: filters.statusFilter as AssignmentStatus }
-          : {}),
+        limit: filters.perPage,
+        status: filters.statusFilter as AssignmentStatus,
+        period: filters.period as Period,
+        duty_date: filters.dutyDate,
       }),
     placeholderData: (previousData) => previousData,
   });

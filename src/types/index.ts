@@ -1,5 +1,5 @@
 // Auth
-export interface User {
+export interface AuthUser {
   id: string;
   email: string;
   full_name: string;
@@ -18,7 +18,7 @@ export interface LoginPayload {
 }
 
 export interface AuthState {
-  user: User | null;
+  user: AuthUser | null;
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -30,12 +30,18 @@ export interface ApiResponse<T> {
   message?: string;
 }
 
-export interface PaginatedResponse<T> {
-  data: T[];
+export interface MetaResponse {
   total: number;
+  limit: number;
+  skip: number;
   page: number;
-  per_page: number;
-  total_pages: number;
+  totalPages: number;
+}
+
+export interface PaginatedResponse<T> {
+  success: boolean;
+  data: T[];
+  meta: MetaResponse;
 }
 
 export interface ListParams {
@@ -84,24 +90,29 @@ export interface CheckpointPayload {
 }
 
 // Assignments
-export type AssignmentStatus = "active" | "inactive" | "completed";
+export type AssignmentStatus = "PENDING" | "ACTIVE" | "CANCELLED" | "COMPLETED";
+export type Period = "daily" | "weekly" | "monthly" | "yearly";
 
 export interface Assignment {
-  id: string;
+  _id: string;
   user_id: string;
   user_name?: string;
   shift_id: string;
   shift_name?: string;
+  shift_start_time?: string;
+  shift_end_time?: string;
+  duty_date?: string;
   assigned_checkpoint_ids: string[];
   status: AssignmentStatus;
   notes?: string;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface AssignmentPayload {
   user_id: string;
   shift_id: string;
+  duty_date: string;
   assigned_checkpoint_ids: string[];
   status: AssignmentStatus;
   notes?: string;
@@ -147,6 +158,29 @@ export interface ScanAnalyticsParams extends ListParams {
   date_to?: string;
   shift_id?: string;
   user_id?: string;
+}
+
+export type UserAppRole = "tenant_admin" | "supervisor" | "guard";
+export interface AppUser {
+  _id: string;
+  tenant_id: string;
+  user_id: string;
+  name: string;
+  email: string;
+  app_role: UserAppRole;
+}
+
+export interface UserPayload {
+  user_id: string;
+  name: string;
+  email: string;
+  app_role: UserAppRole;
+}
+
+export interface UserUpdatePayload {
+  name?: string;
+  email?: string;
+  app_role?: UserAppRole;
 }
 
 // Dashboard
