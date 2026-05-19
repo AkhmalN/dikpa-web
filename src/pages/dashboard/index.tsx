@@ -1,17 +1,3 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
 import {
   Activity,
   AlertTriangle,
@@ -19,77 +5,17 @@ import {
   Clock,
   MapPin,
   Shield,
-  TrendingUp,
-  Users,
 } from "lucide-react";
-import { format, parseISO } from "date-fns";
-import { id as localeId } from "date-fns/locale";
-import { dashboardService } from "@/services/dashboard.service";
+
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatCard } from "@/components/shared/StatCard";
-import { Skeleton } from "@/components/ui/skeleton";
-import type { PeriodFilter } from "@/types";
+
 import { cn } from "@/lib/utils";
-import { useDashboardSummaryQuery } from "@/hooks/use-dashboard-query";
 import { useDashboardPage } from "./use-dashboard-page";
-
-const PERIODS: { label: string; value: PeriodFilter }[] = [
-  { label: "Hari Ini", value: "daily" },
-  { label: "Minggu Ini", value: "weekly" },
-  { label: "Bulan Ini", value: "monthly" },
-  { label: "Tahun Ini", value: "yearly" },
-];
-
-const SEVERITY_COLORS: Record<string, string> = {
-  CRITICAL: "#FB2C36",
-  HIGH: "#E66239",
-  MEDIUM: "#F0B100",
-  LOW: "#00C951",
-};
-
-const INCIDENT_STATUS_LABELS = {
-  OPEN: {
-    label: "Terbuka",
-    className:
-      "bg-[rgba(251,44,54,0.15)] text-[#FB2C36] border-[rgba(251,44,54,0.3)]",
-  },
-  IN_PROGRESS: {
-    label: "Proses",
-    className:
-      "bg-[rgba(240,177,0,0.15)] text-[#F0B100] border-[rgba(240,177,0,0.3)]",
-  },
-  RESOLVED: {
-    label: "Selesai",
-    className:
-      "bg-[rgba(0,201,81,0.15)] text-[#00C951] border-[rgba(0,201,81,0.3)]",
-  },
-};
-
-const SEVERITY_LABELS = {
-  CRITICAL: {
-    label: "Kritis",
-    className:
-      "bg-[rgba(251,44,54,0.15)] text-[#FB2C36] border-[rgba(251,44,54,0.3)]",
-  },
-  HIGH: {
-    label: "Tinggi",
-    className:
-      "bg-[rgba(230,98,57,0.15)] text-[#E66239] border-[rgba(230,98,57,0.3)]",
-  },
-  MEDIUM: {
-    label: "Sedang",
-    className:
-      "bg-[rgba(240,177,0,0.15)] text-[#F0B100] border-[rgba(240,177,0,0.3)]",
-  },
-  LOW: {
-    label: "Rendah",
-    className:
-      "bg-[rgba(0,201,81,0.15)] text-[#00C951] border-[rgba(0,201,81,0.3)]",
-  },
-};
+import { PERIODS } from "@/utils/period-filter";
 
 export function DashboardPage() {
-  const { data, isLoading, setPeriod, period } = useDashboardPage();
+  const { data, isLoading, setPeriod, period, refetch } = useDashboardPage();
   const summary = data?.data.patrols;
   const summaryLoading = isLoading;
 
@@ -173,7 +99,7 @@ export function DashboardPage() {
       </div>
 
       {/* Charts row */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4">
         {/* Patrol Trend Chart - 2/3 */}
         {/* <div className="xl:col-span-2 bg-card border border-border rounded-[6px] p-6">
           <div className="flex items-center justify-between mb-4">

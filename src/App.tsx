@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
@@ -11,7 +10,10 @@ import { CheckpointsPage } from "@/pages/checkpoints";
 import { AssignmentsPage } from "@/pages/assignments/AssignmentsPage";
 import { IncidentsPage } from "@/pages/incidents/IncidentsPage";
 import { ScanAnalyticsPage } from "@/pages/scan-analytics/ScanAnalyticsPage";
+import { LiveAnalyticsPage } from "./pages/live-analytics";
 import { UsersPage } from "@/pages/UsersPage";
+import { Toaster } from "react-hot-toast";
+// import MapLive from "./pages/live-analytics/map-live";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,6 +27,7 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <BrowserRouter>
+      <Toaster />
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <Routes>
@@ -36,6 +39,8 @@ function App() {
             >
               <Route element={<DashboardLayout />}>
                 <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/live-analytics" element={<LiveAnalyticsPage />} />
+                {/* <Route path="/live-analytics/maps" element={<MapLive />} /> */}
                 <Route path="/shifts" element={<ShiftPage />} />
                 <Route path="/checkpoints" element={<CheckpointsPage />} />
                 <Route path="/assignments" element={<AssignmentsPage />} />
@@ -47,7 +52,6 @@ function App() {
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
-          <Toaster richColors position="top-right" />
         </AuthProvider>
       </QueryClientProvider>
     </BrowserRouter>

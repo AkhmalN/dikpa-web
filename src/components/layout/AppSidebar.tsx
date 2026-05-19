@@ -28,6 +28,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "Live Analytics", href: "/live-analytics", icon: BarChart2 },
   { label: "Shifts", href: "/shifts", icon: Clock },
   { label: "Checkpoints", href: "/checkpoints", icon: MapPin },
   { label: "Assignments", href: "/assignments", icon: ClipboardList },

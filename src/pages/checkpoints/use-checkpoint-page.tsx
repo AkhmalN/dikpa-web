@@ -127,7 +127,7 @@ export function useCheckpointPage() {
 
   const openPrintQr = useCallback(
     (cp: Checkpoint) => {
-      printQrMutation.mutate(cp._id);
+      printQrMutation.mutate({ id: cp._id, name: cp.name });
     },
     [printQrMutation],
   );
@@ -165,8 +165,8 @@ export function useCheckpointPage() {
   return {
     columns,
     data: dataQuery.data?.data ?? [],
-    totalItems: dataQuery.data?.total,
-    pageCount: dataQuery.data?.total_pages ?? 1,
+    totalItems: dataQuery.data?.meta.total ?? 0,
+    pageCount: dataQuery.data?.meta.totalPages ?? 1,
     page,
     perPage: PER_PAGE,
     search,

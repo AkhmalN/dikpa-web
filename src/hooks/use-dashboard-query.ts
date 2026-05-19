@@ -17,5 +17,7 @@ export function useDashboardSummaryQuery(period: PeriodFilter, date: string) {
   return useQuery({
     queryKey: dashboardQueryKeys.list({ period, date }),
     queryFn: () => dashboardService.getSummary(period, date),
+    staleTime: 0, // Data immediately considered stale
+    gcTime: 1000 * 60 * 5, // Keep in cache for 5 minutes (for offline)
   });
 }

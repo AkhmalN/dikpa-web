@@ -90,7 +90,8 @@ export function useDeleteCheckpointMutation(options?: MutationHookOptions) {
 
 export function usePrintCheckpointQrMutation() {
   return useMutation({
-    mutationFn: (id: string) => checkpointsService.printQr(id),
+    mutationFn: ({ id, name }: { id: string; name: string }) =>
+      checkpointsService.printQr(id, name),
     onError: (error: Error) => {
       toast.error(error.message || "Gagal mengunduh QR checkpoint");
     },
