@@ -4,6 +4,8 @@ import PatrolRealtimeSection from "./patrol-live";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { MapLive } from "./map-live";
 
+const BASE_URL = import.meta.env.VITE_APP_BASE_URL || "http://localhost:5001";
+
 export function LiveAnalyticsPage() {
   const [patrols, setPatrols] = useState<any[]>([]);
   const [locations, setLocations] = useState<
@@ -11,9 +13,7 @@ export function LiveAnalyticsPage() {
   >([]);
 
   useEffect(() => {
-    const eventSource = new EventSource(
-      "http://localhost:5001/api/v1/patrol-logs/live-patrol",
-    );
+    const eventSource = new EventSource(`${BASE_URL}/patrol-logs/live-patrol`);
 
     eventSource.onmessage = (event) => {
       try {

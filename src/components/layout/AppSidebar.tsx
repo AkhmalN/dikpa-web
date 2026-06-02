@@ -29,12 +29,12 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Live Analytics", href: "/live-analytics", icon: BarChart2 },
-  { label: "Shifts", href: "/shifts", icon: Clock },
-  { label: "Checkpoints", href: "/checkpoints", icon: MapPin },
+  { label: "Master Shifts", href: "/shifts", icon: Clock },
+  { label: "Master Checkpoints", href: "/checkpoints", icon: MapPin },
   { label: "Assignments", href: "/assignments", icon: ClipboardList },
-  { label: "Incidents", href: "/incidents", icon: AlertTriangle },
+  { label: "Incidents Report", href: "/incidents", icon: AlertTriangle },
   { label: "Scan Analytics", href: "/scan-analytics", icon: BarChart2 },
-  { label: "Users", href: "/users", icon: Users },
+  { label: "User Management", href: "/users", icon: Users },
 ];
 
 export function AppSidebar() {

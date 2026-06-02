@@ -1,29 +1,78 @@
 import { apiClient } from "@/lib/axios";
-import type {
-  AppUser,
-  ListParams,
-  UserPayload,
-  UserUpdatePayload,
-} from "@/types";
+import type { ListParams } from "@/types";
 
-type UserListApiResponse = {
-  success: boolean;
-  data: AppUser[];
-  message?: string;
+export const USER_API_BASE_PATH = "/api/v1/users" as const;
+
+export const USER_API_ENDPOINTS = {
+  list: USER_API_BASE_PATH,
+  create: USER_API_BASE_PATH,
+  byId: (id: string) => `${USER_API_BASE_PATH}/${id}`,
+} as const;
+
+export type AppRole = "tenant_admin" | "supervisor" | "guard" | "auditor";
+
+export type UserPayload = {
+  _id: string;
+  tenant_id: string;
+  user_id: string;
+  name: string;
+  email: string;
+  app_role: AppRole;
 };
 
-type UserItemApiResponse = {
-  success: boolean;
-  data: AppUser;
-  message?: string;
+export type CreateUserRequest = {
+  user_id: string;
+  name: string;
+  email: string;
+  app_role: AppRole;
 };
 
-type UserDeleteApiResponse = {
-  success: boolean;
-  message?: string;
+export type UpdateUserRequest = {
+  name?: string;
+  email?: string;
+  app_role?: AppRole;
 };
 
-const USERS_ENDPOINT = "/users";
+export type GetUsersResponse = {
+  success: boolean;
+  message: string;
+  data: UserPayload[];
+};
+
+export type GetUserByIdResponse = {
+  success: boolean;
+  message: string;
+  data: UserPayload;
+};
+
+export type CreateUserResponse = {
+  success: boolean;
+  message: string;
+  data: UserPayload;
+};
+
+export type UpdateUserResponse = {
+  success: boolean;
+  message: string;
+  data: UserPayload;
+};
+
+export type DeleteUserResponse = {
+  success: boolean;
+  message: string;
+};
+
+function resolveApiUrl(path: string): string {
+  const baseUrl = apiClient.defaults.baseURL;
+  if (
+    typeof baseUrl === "string" &&
+    baseUrl.length > 0 &&
+    /^https?:\/\//i.test(baseUrl)
+  ) {
+    return new URL(path, baseUrl).toString();
+  }
+  return path;
+}
 
 function toListQueryParams(params: ListParams = {}) {
   return {
@@ -34,37 +83,43 @@ function toListQueryParams(params: ListParams = {}) {
 }
 
 export const usersService = {
-  async getList(params: ListParams = {}): Promise<UserListApiResponse> {
-    const response = await apiClient.get<UserListApiResponse>(USERS_ENDPOINT, {
-      params: toListQueryParams(params),
-    });
+  async getList(params: ListParams = {}): Promise<GetUsersResponse> {
+    const response = await apiClient.get<GetUsersResponse>(
+      resolveApiUrl(USER_API_ENDPOINTS.list),
+      {
+        params: toListQueryParams(params),
+      },
+    );
     return response.data;
   },
 
-  async getById(id: string): Promise<AppUser> {
-    const response = await apiClient.get<UserItemApiResponse>(
-      `${USERS_ENDPOINT}/${id}`,
+  async getById(id: string): Promise<UserPayload> {
+    const response = await apiClient.get<GetUserByIdResponse>(
+      resolveApiUrl(USER_API_ENDPOINTS.byId(id)),
     );
     return response.data.data;
   },
 
-  async create(payload: UserPayload): Promise<AppUser> {
-    const response = await apiClient.post<UserItemApiResponse>(
-      USERS_ENDPOINT,
+  async create(payload: CreateUserRequest): Promise<UserPayload> {
+    const response = await apiClient.post<CreateUserResponse>(
+      resolveApiUrl(USER_API_ENDPOINTS.create),
       payload,
     );
     return response.data.data;
   },
 
-  async update(id: string, payload: UserUpdatePayload): Promise<AppUser> {
-    const response = await apiClient.put<UserItemApiResponse>(
-      `${USERS_ENDPOINT}/${id}`,
+  async update(id: string, payload: UpdateUserRequest): Promise<UserPayload> {
+    const response = await apiClient.put<UpdateUserResponse>(
+      resolveApiUrl(USER_API_ENDPOINTS.byId(id)),
       payload,
     );
     return response.data.data;
   },
 
-  async remove(id: string): Promise<void> {
-    await apiClient.delete<UserDeleteApiResponse>(`${USERS_ENDPOINT}/${id}`);
+  async remove(id: string): Promise<DeleteUserResponse> {
+    const response = await apiClient.delete<DeleteUserResponse>(
+      resolveApiUrl(USER_API_ENDPOINTS.byId(id)),
+    );
+    return response.data;
   },
 };

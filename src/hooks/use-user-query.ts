@@ -1,7 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { usersService } from "@/services/users.service";
-import type { UserPayload, UserUpdatePayload } from "@/types";
+import type {
+  CreateUserRequest,
+  UpdateUserRequest,
+} from "@/services/users.service";
 
 type UserListQuery = {
   page: number;
@@ -36,7 +39,7 @@ export function useCreateUserMutation(options?: MutationHookOptions) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: UserPayload) => usersService.create(payload),
+    mutationFn: (payload: CreateUserRequest) => usersService.create(payload),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: userQueryKeys.all });
       toast.success("User berhasil dibuat!");
@@ -52,7 +55,7 @@ export function useUpdateUserMutation(options?: MutationHookOptions) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: UserUpdatePayload }) =>
+    mutationFn: ({ id, payload }: { id: string; payload: UpdateUserRequest }) =>
       usersService.update(id, payload),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: userQueryKeys.all });

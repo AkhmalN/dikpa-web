@@ -17,7 +17,7 @@ type Props = {
 };
 
 export const MapLive = ({ locations }: Props) => {
-  console.log("MapLive component received locations:", locations);
+  // console.log("MapLive component received locations:", locations);
   const mapContainer = useRef<HTMLDivElement | null>(null);
 
   const mapRef = useRef<maplibregl.Map | null>(null);

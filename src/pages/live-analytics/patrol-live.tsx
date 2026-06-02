@@ -230,7 +230,7 @@ export default function PatrolRealtimeSection({
   patrols: Session[];
 }) {
   const [now, setNow] = useState(new Date());
-  console.log("Rendering PatrolRealtimeSection with patrols:", patrols);
+  // console.log("Rendering PatrolRealtimeSection with patrols:", patrols);
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 30_000);
     return () => clearInterval(id);
