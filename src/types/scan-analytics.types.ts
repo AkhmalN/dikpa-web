@@ -14,3 +14,37 @@ export interface ScanAnalyticsParams extends ListParams {
   shift_id?: string;
   user_id?: string;
 }
+
+export const PatrolStatus = {
+  ACTIVE: "ACTIVE",
+  COMPLETED: "COMPLETED",
+  AUTO_COMPLETED_SHIFT_END: "AUTO_COMPLETED_SHIFT_END",
+} as const;
+
+export type PatrolStatus = (typeof PatrolStatus)[keyof typeof PatrolStatus];
+
+interface ICurrentScanCheckpoint {
+  checkpoint_id: string;
+  scanned_at: Date;
+}
+
+export interface IHeartbeatLocation {
+  gps_lat: number;
+  gps_lon: number;
+  updated_at?: Date;
+}
+
+export interface IPatrolLogs {
+  tenant_id: string;
+  shift_id: string;
+  user_id: string;
+  assignment_id: string;
+  status: PatrolStatus;
+  started_at: Date;
+  ended_at?: Date;
+  last_heartbeat_location?: IHeartbeatLocation;
+  current_history_location?: IHeartbeatLocation[];
+  current_scan_checkpoint?: ICurrentScanCheckpoint[];
+  total_checkpoint_passed: number;
+  total_incident: number;
+}

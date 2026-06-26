@@ -33,7 +33,7 @@ const navItems = [
   { label: "Master Checkpoints", href: "/checkpoints", icon: MapPin },
   { label: "Assignments", href: "/assignments", icon: ClipboardList },
   { label: "Incidents Report", href: "/incidents", icon: AlertTriangle },
-  { label: "Scan Analytics", href: "/scan-analytics", icon: BarChart2 },
+  // { label: "Scan Analytics", href: "/scan-analytics", icon: BarChart2 },
   { label: "User Management", href: "/users", icon: Users },
 ];
 
