@@ -63,7 +63,7 @@ export function UsersPage() {
         actions={
           <Button
             onClick={openCreate}
-            className="bg-primary hover:bg-[#D6522F] text-white h-9"
+            className="bg-primary hover:bg-primary/80 text-white h-9"
           >
             <Plus className="size-4 mr-1.5" /> Tambah User
           </Button>
@@ -104,24 +104,51 @@ export function UsersPage() {
         isSubmitting={isSubmitting}
         submitLabel={modalMode === "create" ? "Simpan" : "Perbarui"}
       >
+        {/* Password field — only for create, optional on edit */}
+        {modalMode === "create" && (
+          <Controller
+            name="password"
+            control={control}
+            render={({ field }) => (
+              <div className="flex flex-col gap-1.5">
+                <Label>
+                  Password <span className="text-[#FB2C36]">*</span>
+                </Label>
+                <Input
+                  {...field}
+                  type="password"
+                  placeholder="Minimal 6 karakter"
+                  aria-invalid={!!errors.password}
+                  className={cn(errors.password && "border-[#FB2C36]")}
+                />
+                {errors.password && (
+                  <p className="text-[12px] text-[#FB2C36]">
+                    {errors.password.message}
+                  </p>
+                )}
+              </div>
+            )}
+          />
+        )}
+
         <Controller
-          name="user_id"
+          name="username"
           control={control}
           render={({ field }) => (
             <div className="flex flex-col gap-1.5">
               <Label>
-                User ID <span className="text-[#FB2C36]">*</span>
+                Username <span className="text-[#FB2C36]">*</span>
               </Label>
               <Input
                 {...field}
-                placeholder="Contoh: user-001"
+                placeholder="Contoh: guard-001"
                 disabled={modalMode === "edit"}
-                aria-invalid={!!errors.user_id}
-                className={cn(errors.user_id && "border-[#FB2C36]")}
+                aria-invalid={!!errors.username}
+                className={cn(errors.username && "border-[#FB2C36]")}
               />
-              {errors.user_id && (
+              {errors.username && (
                 <p className="text-[12px] text-[#FB2C36]">
-                  {errors.user_id.message}
+                  {errors.username.message}
                 </p>
               )}
             </div>
@@ -176,7 +203,7 @@ export function UsersPage() {
         />
 
         <Controller
-          name="app_role"
+          name="role"
           control={control}
           render={({ field }) => (
             <div className="flex flex-col gap-1.5">
@@ -185,21 +212,21 @@ export function UsersPage() {
               </Label>
               <Select value={field.value} onValueChange={field.onChange}>
                 <SelectTrigger
-                  aria-invalid={!!errors.app_role}
-                  className={cn(errors.app_role && "border-[#FB2C36]")}
+                  aria-invalid={!!errors.role}
+                  className={cn(errors.role && "border-[#FB2C36]")}
                 >
                   <SelectValue placeholder="Pilih role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="tenant_admin">Tenant Admin</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
                   <SelectItem value="supervisor">Supervisor</SelectItem>
                   <SelectItem value="guard">Guard</SelectItem>
                   <SelectItem value="auditor">Auditor</SelectItem>
                 </SelectContent>
               </Select>
-              {errors.app_role && (
+              {errors.role && (
                 <p className="text-[12px] text-[#FB2C36]">
-                  {errors.app_role.message}
+                  {errors.role.message}
                 </p>
               )}
             </div>

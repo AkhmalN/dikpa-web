@@ -43,7 +43,9 @@ export function FormModal({
     <Dialog open={open} onOpenChange={isSubmitting ? undefined : onOpenChange}>
       <DialogContent className={sizeClasses[size]}>
         <DialogHeader>
-          <DialogTitle className="text-[18px] font-bold leading-[22px]">{title}</DialogTitle>
+          <DialogTitle className="text-[18px] font-bold leading-[22px]">
+            {title}
+          </DialogTitle>
         </DialogHeader>
         <ScrollArea className="max-h-[65vh] pr-1">
           <div className="flex flex-col gap-4 py-2">{children}</div>
@@ -60,7 +62,7 @@ export function FormModal({
           <Button
             onClick={onSubmit}
             disabled={isSubmitting}
-            className="bg-primary hover:bg-[#D6522F] text-primary-foreground"
+            className="bg-primary hover:bg-primary/80 text-primary-foreground"
           >
             {isSubmitting && <Spinner className="mr-2" />}
             {submitLabel}

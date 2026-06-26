@@ -12,13 +12,14 @@ import {
 import { getUserColumns } from "./columns";
 
 const userSchema = z.object({
-  user_id: z.string().min(1, "User ID wajib diisi").max(100),
+  username: z.string().min(1, "Username wajib diisi").max(100),
   name: z.string().min(1, "Nama wajib diisi").max(100),
   email: z
     .string()
     .min(1, "Email wajib diisi")
     .email("Format email tidak valid"),
-  app_role: z.enum(["tenant_admin", "supervisor", "guard", "auditor"]),
+  role: z.enum(["admin", "supervisor", "guard", "auditor"]),
+  password: z.string().min(6, "Password minimal 6 karakter").optional(),
 });
 
 export type UserFormData = z.infer<typeof userSchema>;
@@ -28,14 +29,15 @@ type ModalMode = "create" | "edit" | "detail" | null;
 const PER_PAGE = 10;
 
 const DEFAULT_USER_FORM_VALUES: UserFormData = {
-  user_id: "",
+  username: "",
   name: "",
   email: "",
-  app_role: "guard",
+  role: "guard",
+  password: "",
 };
 
 const ROLE_LABEL: Record<AppRole, string> = {
-  tenant_admin: "Tenant Admin",
+  admin: "Admin",
   supervisor: "Supervisor",
   guard: "Guard",
   auditor: "Auditor",
@@ -45,9 +47,9 @@ function getUserDetailRows(user: UserPayload) {
   return [
     { label: "Nama", value: user.name },
     { label: "Email", value: user.email },
-    { label: "User ID", value: user.user_id },
+    { label: "Username", value: user.username },
     { label: "Tenant ID", value: user.tenant_id },
-    { label: "Role", value: ROLE_LABEL[user.app_role] },
+    { label: "Role", value: ROLE_LABEL[user.role] },
     { label: "Mongo ID", value: user._id },
   ];
 }
@@ -88,8 +90,8 @@ export function useUsersPage() {
       return (
         user.name.toLowerCase().includes(keyword) ||
         user.email.toLowerCase().includes(keyword) ||
-        user.user_id.toLowerCase().includes(keyword) ||
-        ROLE_LABEL[user.app_role].toLowerCase().includes(keyword)
+        user.username.toLowerCase().includes(keyword) ||
+        ROLE_LABEL[user.role].toLowerCase().includes(keyword)
       );
     });
   }, [allUsers, search]);
@@ -116,10 +118,11 @@ export function useUsersPage() {
   const openEdit = useCallback(
     (user: UserPayload) => {
       form.reset({
-        user_id: user.user_id,
+        username: user.username,
         name: user.name,
         email: user.email,
-        app_role: user.app_role,
+        role: user.role,
+        password: "",
       });
       setSelectedUser(user);
       setModalMode("edit");
@@ -135,19 +138,23 @@ export function useUsersPage() {
   const onSubmit = useCallback(
     (data: UserFormData) => {
       if (modalMode === "create") {
-        createMutation.mutate(data);
+        createMutation.mutate({ ...data, password: data.password ?? "" });
         return;
       }
 
       if (modalMode === "edit" && selectedUser) {
-        updateMutation.mutate({
+        const updatePayload: Parameters<typeof updateMutation.mutate>[0] = {
           id: selectedUser._id,
           payload: {
             name: data.name,
             email: data.email,
-            app_role: data.app_role,
+            role: data.role,
           },
-        });
+        };
+        if (data.password) {
+          updatePayload.payload.password = data.password;
+        }
+        updateMutation.mutate(updatePayload);
       }
     },
     [createMutation, modalMode, selectedUser, updateMutation],

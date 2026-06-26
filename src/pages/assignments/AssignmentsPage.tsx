@@ -74,7 +74,7 @@ export function AssignmentsPage() {
         actions={
           <Button
             onClick={openCreate}
-            className="bg-primary hover:bg-[#D6522F] text-white h-9"
+            className="bg-primary hover:bg-primary/80 text-white h-9"
           >
             <Plus className="size-4 mr-1.5" /> Tambah Assignment
           </Button>
@@ -134,7 +134,7 @@ export function AssignmentsPage() {
                   </SelectTrigger>
                   <SelectContent>
                     {userData.map((u) => (
-                      <SelectItem key={u._id} value={u.user_id}>
+                      <SelectItem key={u._id} value={u._id}>
                         {u.name}
                       </SelectItem>
                     ))}

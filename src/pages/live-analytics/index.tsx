@@ -4,11 +4,16 @@ import PatrolRealtimeSection from "./patrol-live";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { MapLive } from "./map-live";
 import type { IPatrolLogs } from "@/types";
+import { PatrolCardList } from "./patrol-live/components/PatrolCardList";
+import { useRealtimeNow } from "./patrol-live/hooks";
 
-const BASE_URL = import.meta.env.VITE_APP_BASE_URL || "http://localhost:5001";
+const BASE_URL = (
+  import.meta.env.VITE_APP_BASE_URL || "http://localhost:5001/api/v1"
+).replace(/\/api\/v1\/?$/, "");
 
 export function LiveAnalyticsPage() {
   const [patrols, setPatrols] = useState<IPatrolLogs[] | []>([]);
+  const now = useRealtimeNow();
 
   useEffect(() => {
     const eventSource = new EventSource(`${BASE_URL}/patrol-logs/live-patrol`);
@@ -146,17 +151,14 @@ export function LiveAnalyticsPage() {
           title="Live Analytics"
           description="Status petugas yang sedang bertugas"
         />
-        <div>
-          <PatrolRealtimeSection patrols={patrols} />
-        </div>
-      </div>
-      <div>
-        <PageHeader
-          title="Live Map"
-          description="Peta lokasi petugas secara real-time"
-        />
-        <div>
-          <MapLive patrols={patrols} />
+        <PatrolRealtimeSection patrols={patrols} />
+        <div className="mt-4 grid grid-cols-1 gap-6 lg:grid-cols-12">
+          <div className="lg:col-span-5">
+            <PatrolCardList patrols={patrols} now={now} />
+          </div>
+          <div className="lg:col-span-7">
+            <MapLive patrols={patrols} />
+          </div>
         </div>
       </div>
     </div>

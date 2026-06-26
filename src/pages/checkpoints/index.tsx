@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { DataTable } from "@/components/shared/DataTable";
 import { FormModal } from "@/components/shared/FormModal";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import { MapPicker } from "@/components/shared/MapPicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,6 +36,9 @@ export function CheckpointsPage() {
     isDeleting,
     control,
     errors,
+    watchedLat,
+    watchedLon,
+    setValue,
     openCreate,
     openEdit,
     closeModal,
@@ -53,7 +57,7 @@ export function CheckpointsPage() {
         actions={
           <Button
             onClick={openCreate}
-            className="bg-primary hover:bg-[#D6522F] text-white h-9"
+            className="bg-primary hover:bg-primary/80 text-white h-9"
           >
             <Plus className="size-4 mr-1.5" /> Tambah Checkpoint
           </Button>
@@ -92,7 +96,16 @@ export function CheckpointsPage() {
         onSubmit={handleSubmit}
         isSubmitting={isSubmitting}
         submitLabel={modalMode === "create" ? "Simpan" : "Perbarui"}
+        size="lg"
       >
+        <MapPicker
+          lat={watchedLat}
+          lon={watchedLon}
+          onChange={(lat, lon) => {
+            setValue("gps_lat", lat, { shouldDirty: true });
+            setValue("gps_lon", lon, { shouldDirty: true });
+          }}
+        />
         <Controller
           name="name"
           control={control}

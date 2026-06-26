@@ -10,6 +10,8 @@ interface ProtectedRouteProps {
 export function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
   const { isAuthenticated, isLoading, user, logout } = useAuth();
 
+  console.log("user data in ProtectedRoute:", user);
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">

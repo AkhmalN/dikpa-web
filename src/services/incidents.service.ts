@@ -8,7 +8,7 @@ import type {
 } from "@/types";
 import { apiClient } from "@/lib/axios";
 
-const INCIDENTS_ENDPOINT = "/api/v1/incidents/";
+const INCIDENTS_ENDPOINT = "/incidents/";
 
 type IncidentApiPayload = {
   _id: string;
@@ -44,18 +44,6 @@ type IncidentItemApiResponse = {
   message?: string;
 };
 
-function resolveApiUrl(path: string): string {
-  const baseUrl = apiClient.defaults.baseURL;
-  if (
-    typeof baseUrl === "string" &&
-    baseUrl.length > 0 &&
-    /^https?:\/\//i.test(baseUrl)
-  ) {
-    return new URL(path, baseUrl).toString();
-  }
-  return path;
-}
-
 function mapIncident(payload: IncidentApiPayload): Incident {
   return {
     ...payload,
@@ -78,7 +66,7 @@ function toListQueryParams(params: ListParams = {}) {
 export const incidentsService = {
   async getList(params: ListParams = {}): Promise<PaginatedResponse<Incident>> {
     const response = await apiClient.get<IncidentListApiResponse>(
-      resolveApiUrl(INCIDENTS_ENDPOINT),
+      INCIDENTS_ENDPOINT,
       { params: toListQueryParams(params) },
     );
 
@@ -91,7 +79,7 @@ export const incidentsService = {
 
   async getById(id: string): Promise<Incident> {
     const response = await apiClient.get<IncidentItemApiResponse>(
-      resolveApiUrl(`${INCIDENTS_ENDPOINT}${id}`),
+      `${INCIDENTS_ENDPOINT}${id}`,
     );
     return mapIncident(response.data.data);
   },

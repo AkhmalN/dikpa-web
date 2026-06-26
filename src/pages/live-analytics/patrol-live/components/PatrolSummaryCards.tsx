@@ -34,7 +34,7 @@ export function PatrolSummaryCards({
           </svg>
         }
       />
-      {/* <StatCard
+      <StatCard
         label="Sinyal Live"
         value={liveCount}
         sub={`dari ${totalActive} petugas`}
@@ -54,7 +54,7 @@ export function PatrolSummaryCards({
             <circle cx="12" cy="20" r="1" fill="currentColor" />
           </svg>
         }
-      /> */}
+      />
       <StatCard
         label="Checkpoint Discan"
         value={totalCheckpoints}

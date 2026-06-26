@@ -26,22 +26,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
-  const logout = useCallback(() => {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("user");
+  const logout = useCallback(async () => {
+    await authService.logout();
     setUser(null);
     setToken(null);
     navigate("/login", { replace: true });
   }, [navigate]);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem("access_token");
-    const storedUser = localStorage.getItem("user");
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
-    }
-    setIsLoading(false);
+    const initAuth = async () => {
+      const storedToken = localStorage.getItem("access_token");
+      if (!storedToken) {
+        setIsLoading(false);
+        return;
+      }
+      try {
+        // Sets Authorization header via apiClient interceptor
+        const userData = await authService.me();
+        setToken(storedToken);
+        setUser(userData);
+      } catch {
+        // Token invalid/expired & refresh failed → clear
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        localStorage.removeItem("user");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initAuth();
 
     const handleAuthLogout = () => logout();
     window.addEventListener("auth:logout", handleAuthLogout);
@@ -50,8 +64,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = useCallback(
     async (payload: LoginPayload) => {
-      const { tokens, user: userData } = await authService.login(payload);
+      const tokens = await authService.login(payload);
       localStorage.setItem("access_token", tokens.access_token);
+      if (tokens.refresh_token) {
+        localStorage.setItem("refresh_token", tokens.refresh_token);
+      }
+      const userData = await authService.me();
       localStorage.setItem("user", JSON.stringify(userData));
       setToken(tokens.access_token);
       setUser(userData);

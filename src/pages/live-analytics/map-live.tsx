@@ -81,32 +81,6 @@ export const MapLive = ({ patrols }: Props) => {
     // Initialize markers will be created when locations arrive
 
     map.on("load", () => {
-      map.addSource("office-area", {
-        type: "geojson",
-        data: officeAreaGeoJsonRef.current,
-      });
-
-      map.addLayer({
-        id: "office-area-fill",
-        type: "fill",
-        source: "office-area",
-        paint: {
-          "fill-color": "#22c55e",
-          "fill-opacity": 0.18,
-        },
-      });
-
-      map.addLayer({
-        id: "office-area-outline",
-        type: "line",
-        source: "office-area",
-        paint: {
-          "line-color": "#16a34a",
-          "line-width": 2,
-          "line-opacity": 0.95,
-        },
-      });
-
       map.addSource("route", {
         type: "geojson",
         data: routeGeoJsonRef.current,
@@ -124,6 +98,7 @@ export const MapLive = ({ patrols }: Props) => {
           "line-color": "#22c55e",
           "line-width": 4,
           "line-opacity": 0.8,
+          "line-dasharray": [1.5, 1.5],
         },
       });
     });

@@ -1,23 +1,29 @@
-export type UserAppRole = "tenant_admin" | "supervisor" | "guard" | "auditor";
+export type UserAppRole = "admin" | "supervisor" | "guard" | "auditor";
 
 export interface AppUser {
   _id: string;
   tenant_id: string;
-  user_id: string;
+  username: string;
   name: string;
   email: string;
-  app_role: UserAppRole;
+  role: UserAppRole;
+  phone?: string;
+  is_active?: boolean;
 }
 
 export interface UserPayload {
-  user_id: string;
+  username: string;
   name: string;
   email: string;
-  app_role: UserAppRole;
+  password: string;
+  role: UserAppRole;
+  phone?: string;
 }
 
 export interface UserUpdatePayload {
   name?: string;
   email?: string;
-  app_role?: UserAppRole;
+  role?: UserAppRole;
+  phone?: string;
+  is_active?: boolean;
 }

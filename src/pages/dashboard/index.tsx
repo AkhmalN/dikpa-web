@@ -52,7 +52,7 @@ export function DashboardPage() {
           icon={<Shield className="size-4" />}
           variant="orange"
           isLoading={summaryLoading}
-          trend={{ value: 8.2, label: "vs periode lalu" }}
+          // trend={{ value: 8.2, label: "vs periode lalu" }}
         />
         <StatCard
           title="Completion Rate"
@@ -60,7 +60,7 @@ export function DashboardPage() {
           icon={<CheckSquare className="size-4" />}
           variant="green"
           isLoading={summaryLoading}
-          trend={{ value: 1.5, label: "vs periode lalu" }}
+          // trend={{ value: 1.5, label: "vs periode lalu" }}
         />
         <StatCard
           title="Rata-rata Durasi"
@@ -86,7 +86,7 @@ export function DashboardPage() {
           icon={<AlertTriangle className="size-4" />}
           variant="default"
           isLoading={summaryLoading}
-          trend={{ value: -12.3, label: "vs periode lalu" }}
+          // trend={{ value: -12.3, label: "vs periode lalu" }}
         />
         <StatCard
           title="Patrol Aktif"
@@ -94,7 +94,7 @@ export function DashboardPage() {
           icon={<Activity className="size-4" />}
           variant="green"
           isLoading={summaryLoading}
-          subtitle="Sedang berjalan"
+          // subtitle="Sedang berjalan"
         />
       </div>
 

@@ -1,7 +1,6 @@
 import type { IPatrolLogs } from "@/types/scan-analytics.types";
 import { usePatrolSummary, useRealtimeNow } from "./patrol-live/hooks";
 import { PatrolSummaryCards } from "./patrol-live/components/PatrolSummaryCards";
-import { PatrolTable } from "./patrol-live/components/PatrolTable";
 
 interface PatrolRealtimeSectionProps {
   patrols: IPatrolLogs[];
@@ -22,7 +21,6 @@ export default function PatrolRealtimeSection({
         totalCheckpoints={totalCheckpoints}
         totalIncidents={totalIncidents}
       />
-      <PatrolTable patrols={patrols} now={now} />
     </div>
   );
 }

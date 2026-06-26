@@ -1,4 +1,5 @@
 export * from "./api.types";
+export * from "./atensi.types";
 export * from "./auth.types";
 export * from "./assignments.types";
 export * from "./checkpoints.types";

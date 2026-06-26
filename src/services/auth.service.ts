@@ -1,54 +1,50 @@
-// import { apiClient } from "@/lib/axios"; // TODO: uncomment when backend is ready
-import type { LoginPayload, AuthTokens, AuthUser } from "@/types";
+import { apiClient } from "@/lib/axios";
+import axios from "axios";
+import type {
+  LoginPayload,
+  AuthTokens,
+  AuthUser,
+  LoginApiResponse,
+  MeApiResponse,
+} from "@/types";
 
-// TODO: Replace mock with real API call when backend is ready
+const BASE_URL =
+  import.meta.env.VITE_APP_BASE_URL || "https://api.smartpatrol.example.com/v1";
+
 export const authService = {
-  async login(
-    payload: LoginPayload,
-  ): Promise<{ tokens: AuthTokens; user: AuthUser }> {
-    // MOCK: Simulates successful login for demo
-    await new Promise((r) => setTimeout(r, 800));
-    if (
-      payload.email === "admin@smartpatrol.com" &&
-      payload.password === "password"
-    ) {
-      return {
-        tokens: { access_token: "mock-access-token-tenant-admin" },
-        user: {
-          id: "1",
-          email: payload.email,
-          full_name: "Ahmad Ridwan",
-          role: "tenant_admin",
-        },
-      };
-    }
-    if (
-      payload.email === "supervisor@smartpatrol.com" &&
-      payload.password === "password"
-    ) {
-      return {
-        tokens: { access_token: "mock-access-token-supervisor" },
-        user: {
-          id: "2",
-          email: payload.email,
-          full_name: "Budi Santoso",
-          role: "supervisor",
-        },
-      };
-    }
-    throw new Error("Email atau password salah.");
-    // Real API: return apiClient.post("/auth/login", payload).then(r => r.data);
+  async login(payload: LoginPayload): Promise<AuthTokens> {
+    const { data } = await apiClient.post<LoginApiResponse>(
+      "/auth/login",
+      payload,
+    );
+    return data.data;
+  },
+
+  async refreshToken(refreshToken: string): Promise<AuthTokens> {
+    // Note: use raw axios, not apiClient — avoids intercept loop
+    const { data } = await axios.post(`${BASE_URL}/auth/refresh`, {
+      refresh_token: refreshToken,
+    });
+    return data.data;
   },
 
   async logout(): Promise<void> {
-    // Real API: return apiClient.post("/auth/logout").then(r => r.data);
-    await new Promise((r) => setTimeout(r, 100));
+    try {
+      const refreshToken = localStorage.getItem("refresh_token");
+      if (refreshToken) {
+        await apiClient.post("/auth/logout", { refresh_token: refreshToken });
+      }
+    } catch {
+      // ignore network errors during logout
+    } finally {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      localStorage.removeItem("user");
+    }
   },
 
   async me(): Promise<AuthUser> {
-    // Real API: return apiClient.get("/auth/me").then(r => r.data);
-    const user = localStorage.getItem("user");
-    if (user) return JSON.parse(user);
-    throw new Error("Not authenticated");
+    const { data } = await apiClient.get<MeApiResponse>("/auth/me");
+    return data.data;
   },
 };

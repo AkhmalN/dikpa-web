@@ -1,7 +1,7 @@
 import { apiClient } from "@/lib/axios";
 import type { ListParams } from "@/types";
 
-export const USER_API_BASE_PATH = "/api/v1/users" as const;
+export const USER_API_BASE_PATH = "/users" as const;
 
 export const USER_API_ENDPOINTS = {
   list: USER_API_BASE_PATH,
@@ -9,28 +9,35 @@ export const USER_API_ENDPOINTS = {
   byId: (id: string) => `${USER_API_BASE_PATH}/${id}`,
 } as const;
 
-export type AppRole = "tenant_admin" | "supervisor" | "guard" | "auditor";
+export type AppRole = "admin" | "supervisor" | "guard" | "auditor";
 
 export type UserPayload = {
   _id: string;
   tenant_id: string;
-  user_id: string;
+  username: string;
   name: string;
   email: string;
-  app_role: AppRole;
+  role: AppRole;
+  phone?: string;
+  is_active?: boolean;
 };
 
 export type CreateUserRequest = {
-  user_id: string;
+  username: string;
   name: string;
   email: string;
-  app_role: AppRole;
+  password: string;
+  role: AppRole;
+  phone?: string;
 };
 
 export type UpdateUserRequest = {
   name?: string;
   email?: string;
-  app_role?: AppRole;
+  password?: string;
+  role?: AppRole;
+  phone?: string;
+  is_active?: boolean;
 };
 
 export type GetUsersResponse = {
@@ -62,18 +69,6 @@ export type DeleteUserResponse = {
   message: string;
 };
 
-function resolveApiUrl(path: string): string {
-  const baseUrl = apiClient.defaults.baseURL;
-  if (
-    typeof baseUrl === "string" &&
-    baseUrl.length > 0 &&
-    /^https?:\/\//i.test(baseUrl)
-  ) {
-    return new URL(path, baseUrl).toString();
-  }
-  return path;
-}
-
 function toListQueryParams(params: ListParams = {}) {
   return {
     ...(params.page ? { page: params.page } : {}),
@@ -85,7 +80,7 @@ function toListQueryParams(params: ListParams = {}) {
 export const usersService = {
   async getList(params: ListParams = {}): Promise<GetUsersResponse> {
     const response = await apiClient.get<GetUsersResponse>(
-      resolveApiUrl(USER_API_ENDPOINTS.list),
+      USER_API_ENDPOINTS.list,
       {
         params: toListQueryParams(params),
       },
@@ -95,14 +90,14 @@ export const usersService = {
 
   async getById(id: string): Promise<UserPayload> {
     const response = await apiClient.get<GetUserByIdResponse>(
-      resolveApiUrl(USER_API_ENDPOINTS.byId(id)),
+      USER_API_ENDPOINTS.byId(id),
     );
     return response.data.data;
   },
 
   async create(payload: CreateUserRequest): Promise<UserPayload> {
     const response = await apiClient.post<CreateUserResponse>(
-      resolveApiUrl(USER_API_ENDPOINTS.create),
+      USER_API_ENDPOINTS.create,
       payload,
     );
     return response.data.data;
@@ -110,7 +105,7 @@ export const usersService = {
 
   async update(id: string, payload: UpdateUserRequest): Promise<UserPayload> {
     const response = await apiClient.put<UpdateUserResponse>(
-      resolveApiUrl(USER_API_ENDPOINTS.byId(id)),
+      USER_API_ENDPOINTS.byId(id),
       payload,
     );
     return response.data.data;
@@ -118,7 +113,7 @@ export const usersService = {
 
   async remove(id: string): Promise<DeleteUserResponse> {
     const response = await apiClient.delete<DeleteUserResponse>(
-      resolveApiUrl(USER_API_ENDPOINTS.byId(id)),
+      USER_API_ENDPOINTS.byId(id),
     );
     return response.data;
   },

@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 
+const API_BASE =
+  import.meta.env.VITE_APP_BASE_URL || "http://localhost:5001/api/v1";
+
 export const SecureImage = ({ path }) => {
   const [imgSrc, setImgSrc] = useState(null);
 
   useEffect(() => {
-    // Panggil backend Anda untuk mendapatkan Presigned URL
-    fetch(
-      `http://localhost:5001/api/v1/incidents/image-url?path=${encodeURIComponent(path)}`,
-    )
+    fetch(`${API_BASE}/incidents/image-url?path=${encodeURIComponent(path)}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {

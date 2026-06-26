@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { UserPayload } from "@/services/users.service";
+import type { UserPayload, AppRole } from "@/services/users.service";
 
 type UserColumnsProps = {
   onDetail: (user: UserPayload) => void;
@@ -15,8 +15,8 @@ type UserColumnsProps = {
   onDelete: (user: UserPayload) => void;
 };
 
-const ROLE_BADGE_CLASS: Record<UserPayload["app_role"], string> = {
-  tenant_admin:
+const ROLE_BADGE_CLASS: Record<AppRole, string> = {
+  admin:
     "bg-[rgba(250,173,20,0.15)] text-[#B06A00] border-[rgba(250,173,20,0.35)]",
   supervisor:
     "bg-[rgba(24,144,255,0.14)] text-[#0958D9] border-[rgba(24,144,255,0.35)]",
@@ -26,8 +26,8 @@ const ROLE_BADGE_CLASS: Record<UserPayload["app_role"], string> = {
     "bg-[rgba(114,46,209,0.14)] text-[#531DAB] border-[rgba(114,46,209,0.35)]",
 };
 
-const ROLE_LABEL: Record<UserPayload["app_role"], string> = {
-  tenant_admin: "Tenant Admin",
+const ROLE_LABEL: Record<AppRole, string> = {
+  admin: "Admin",
   supervisor: "Supervisor",
   guard: "Guard",
   auditor: "Auditor",
@@ -56,22 +56,22 @@ export function getUserColumns({
       ),
     },
     {
-      accessorKey: "user_id",
-      header: "User ID",
+      accessorKey: "username",
+      header: "Username",
       cell: ({ row }) => (
         <span className="text-[12px] font-mono bg-[#F5F5F5] px-2 py-0.5 rounded-[4px]">
-          {row.original.user_id}
+          {row.original.username}
         </span>
       ),
     },
     {
-      accessorKey: "app_role",
+      accessorKey: "role",
       header: "Role",
       cell: ({ row }) => (
         <span
-          className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${ROLE_BADGE_CLASS[row.original.app_role]}`}
+          className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${ROLE_BADGE_CLASS[row.original.role]}`}
         >
-          {ROLE_LABEL[row.original.app_role]}
+          {ROLE_LABEL[row.original.role]}
         </span>
       ),
     },

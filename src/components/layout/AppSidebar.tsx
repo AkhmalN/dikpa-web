@@ -7,7 +7,6 @@ import {
   AlertTriangle,
   BarChart2,
   Users,
-  Shield,
 } from "lucide-react";
 import {
   Sidebar,
@@ -26,6 +25,8 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import brandLogo from "/assets/cleroz-brand.png";
+
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Live Analytics", href: "/live-analytics", icon: BarChart2 },
@@ -35,6 +36,7 @@ const navItems = [
   { label: "Incidents Report", href: "/incidents", icon: AlertTriangle },
   // { label: "Scan Analytics", href: "/scan-analytics", icon: BarChart2 },
   { label: "User Management", href: "/users", icon: Users },
+  { label: "Atensi", href: "/atensi", icon: Users },
 ];
 
 export function AppSidebar() {
@@ -57,22 +59,12 @@ export function AppSidebar() {
       <SidebarHeader className="border-b border-sidebar-border px-4 py-3 h-[60px] flex-row items-center justify-between">
         {!isCollapsed && (
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-[6px] bg-primary flex items-center justify-center">
-              <Shield className="text-white size-4" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[14px] font-bold text-foreground leading-tight">
-                SmartPatrol
-              </span>
-              <span className="text-[11px] text-muted-foreground leading-tight">
-                Admin Dashboard
-              </span>
-            </div>
+            <img src={brandLogo} alt="ClerOz" className="h-8 w-auto" />
           </div>
         )}
         {isCollapsed && (
-          <div className="w-8 h-8 rounded-[6px] bg-primary flex items-center justify-center mx-auto">
-            <Shield className="text-white size-4" />
+          <div className="flex items-center justify-center mx-auto">
+            <img src={brandLogo} alt="ClerOz" className="h-8 w-auto" />
           </div>
         )}
       </SidebarHeader>
@@ -129,12 +121,12 @@ export function AppSidebar() {
           <div className="flex items-center gap-3 px-1">
             <Avatar size="sm">
               <AvatarFallback className="bg-primary text-primary-foreground text-[11px] font-bold">
-                {user ? getInitials(user.full_name) : "?"}
+                {user ? getInitials(user.username) : "?"}
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col flex-1 min-w-0">
               <span className="text-[12px] font-medium text-foreground truncate">
-                {user?.full_name}
+                {user?.username}
               </span>
               <span className="text-[11px] text-muted-foreground capitalize truncate">
                 {user?.role?.replace("_", " ")}
@@ -144,7 +136,7 @@ export function AppSidebar() {
         ) : (
           <Avatar size="sm" className="mx-auto">
             <AvatarFallback className="bg-primary text-primary-foreground text-[11px] font-bold">
-              {user ? getInitials(user.full_name) : "?"}
+              {user ? getInitials(user.username) : "?"}
             </AvatarFallback>
           </Avatar>
         )}

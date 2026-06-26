@@ -88,8 +88,13 @@ export function useCheckpointPage() {
     control,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors },
   } = form;
+
+  const watchedLat = watch("gps_lat");
+  const watchedLon = watch("gps_lon");
 
   const closeModal = useCallback(() => {
     setModalMode(null);
@@ -179,6 +184,9 @@ export function useCheckpointPage() {
     isDeleting: deleteMutation.isPending,
     control,
     errors,
+    watchedLat,
+    watchedLon,
+    setValue,
     openCreate,
     openEdit,
     openDetail,
@@ -186,6 +194,7 @@ export function useCheckpointPage() {
     setPage,
     setSearch,
     setDeleteTarget,
+    setValue,
     handleSubmit: handleSubmit(onSubmit),
     confirmDelete: () =>
       deleteTarget && deleteMutation.mutate(deleteTarget._id),

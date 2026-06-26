@@ -44,6 +44,14 @@ export const shiftsService = {
     return response.data;
   },
 
+  async getAll(): Promise<Shift[]> {
+    const response = await apiClient.get<ShiftListApiResponse>(
+      SHIFTS_ENDPOINT,
+      { params: { page: 1, limit: 100 } },
+    );
+    return response.data.data;
+  },
+
   async getById(id: string): Promise<Shift> {
     const response = await apiClient.get<ShiftItemApiResponse>(
       `${SHIFTS_ENDPOINT}/${id}`,
