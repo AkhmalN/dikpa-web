@@ -351,30 +351,23 @@ export function IncidentsPage() {
                   <div className="grid grid-cols-2 gap-2 max-h-56 overflow-auto">
                     {detailIncident.upload_paths.map((path) => {
                       const baseUrl =
-                        import.meta.env.VITE_APP_R2_PUBLIC_URL?.replace(
-                          /\/$/,
-                          "",
-                        );
+                        import.meta.env.VITE_APP_R2_PUBLIC_URL;
                       const imageUrl = `${baseUrl}/${path}`;
                       return (
-                        // <div
-                        //   key={path}
-                        //   className="rounded-md border border-border overflow-hidden bg-muted flex flex-col"
-                        // >
-                        //   <img
-                        //     src={imageUrl}
-                        //     alt="Bukti insiden"
-                        //     loading="lazy"
-                        //     className="w-full h-24 object-cover"
-                        //     onError={(event) => {
-                        //       event.currentTarget.style.display = "none";
-                        //     }}
-                        //   />
-                        //   <p className="text-[10px] text-muted-foreground px-2 py-1 truncate">
-                        //     {path}
-                        //   </p>
-                        // </div>
-                        <SecureImage path={path} />
+                        <div
+                          key={path}
+                          className="rounded-md border border-border overflow-hidden bg-muted flex flex-col"
+                        >
+                          <img
+                            src={imageUrl}
+                            alt="Bukti insiden"
+                            loading="lazy"
+                            className="w-full h-24 object-cover"
+                            onError={(event) => {
+                              event.currentTarget.style.display = "none";
+                            }}
+                          />
+                        </div>
                       );
                     })}
                   </div>

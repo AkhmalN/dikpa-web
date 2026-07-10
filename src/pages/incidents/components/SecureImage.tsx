@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 
-const API_BASE =
+const API_BASE = 
   import.meta.env.VITE_APP_BASE_URL || "http://localhost:5001/api/v1";
 
-export const SecureImage = ({ path }) => {
-  const [imgSrc, setImgSrc] = useState(null);
+interface SecureImageProps {
+  path: string;
+}
+
+export const SecureImage = ({ path }: SecureImageProps) => {
+  const [imgSrc, setImgSrc] = useState<string | null>(null);
 
   useEffect(() => {
     fetch(`${API_BASE}/incidents/image-url?path=${encodeURIComponent(path)}`)

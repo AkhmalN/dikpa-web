@@ -12,7 +12,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import brandLogo from "/assets/cleroz-brand.png";
+import brandLogo from "/assets/garda-brand.png";
 
 const schema = z.object({
   tenant_id: z.string().min(1, "Tenant ID wajib diisi"),
@@ -60,7 +60,7 @@ export function LoginPage() {
       <div className="hidden lg:flex lg:flex-col lg:w-[440px] xl:w-[520px] bg-primary p-12 relative overflow-hidden">
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-12">
-            <img src={brandLogo} alt="ClerOz" className="h-10 w-auto" />
+            <img src={brandLogo} alt="Garda" className="h-10 w-auto" />
           </div>
           <div className="mt-auto pt-32">
             <h2 className="text-[32px] font-bold text-white leading-[38px] mb-4">
@@ -99,7 +99,7 @@ export function LoginPage() {
         <div className="w-full max-w-sm">
           {/* Mobile logo */}
           <div className="flex items-center gap-2 mb-8 lg:hidden">
-            <img src={brandLogo} alt="ClerOz" className="h-8 w-auto" />
+            <img src={brandLogo} alt="Garda" className="h-8 w-auto" />
           </div>
 
           <div className="bg-white rounded-[6px] border border-border p-8 shadow-sm">

@@ -11,7 +11,10 @@ export class ApiError extends Error {
 }
 
 const BASE_URL =
-  import.meta.env.VITE_APP_BASE_URL || "https://api.smartpatrol.example.com/v1";
+  import.meta.env.VITE_APP_BASE_URL ||
+  "http://localhost:5001/api/v1" ||
+  "http://10.84.245.47:5001/api/v1" ||
+  "http://10.84.245.47:5001/api/v1";
 
 export const apiClient = axios.create({
   baseURL: BASE_URL,

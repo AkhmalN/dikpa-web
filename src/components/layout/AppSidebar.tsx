@@ -25,7 +25,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import brandLogo from "/assets/cleroz-brand.png";
+import brandLogo from "/assets/garda-brand.png";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -59,12 +59,12 @@ export function AppSidebar() {
       <SidebarHeader className="border-b border-sidebar-border px-4 py-3 h-[60px] flex-row items-center justify-between">
         {!isCollapsed && (
           <div className="flex items-center gap-2">
-            <img src={brandLogo} alt="ClerOz" className="h-8 w-auto" />
+            <img src={brandLogo} alt="Garda" className="h-8 w-auto" />
           </div>
         )}
         {isCollapsed && (
           <div className="flex items-center justify-center mx-auto">
-            <img src={brandLogo} alt="ClerOz" className="h-8 w-auto" />
+            <img src={brandLogo} alt="Garda" className="h-8 w-auto" />
           </div>
         )}
       </SidebarHeader>
