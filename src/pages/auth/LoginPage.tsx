@@ -12,7 +12,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import brandLogo from "/assets/garda-brand.png";
+import brandLogo from "/assets/garda-brand.jpeg";
 
 const schema = z.object({
   tenant_id: z.string().min(1, "Tenant ID wajib diisi"),

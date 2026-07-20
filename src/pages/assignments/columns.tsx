@@ -36,15 +36,7 @@ export function useAssignmentColumns({
           </span>
         ),
       },
-      {
-        accessorKey: "shift_name",
-        header: "Shift",
-        cell: ({ row }) => (
-          <span className="text-[13px] text-muted-foreground">
-            {row.original.shift_name || "—"}
-          </span>
-        ),
-      },
+
       {
         id: "checkpoints_count",
         header: "Checkpoint",
@@ -64,15 +56,7 @@ export function useAssignmentColumns({
           />
         ),
       },
-      {
-        accessorKey: "notes",
-        header: "Catatan",
-        cell: ({ row }) => (
-          <span className="text-[13px] text-muted-foreground truncate max-w-[160px] block">
-            {row.original.notes || "—"}
-          </span>
-        ),
-      },
+
       {
         accessorKey: "created_at",
         header: "Dibuat",
@@ -81,6 +65,15 @@ export function useAssignmentColumns({
             {format(parseISO(row.original.createdAt), "dd MMM yyyy", {
               locale: localeId,
             })}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "shift_name",
+        header: "Shift",
+        cell: ({ row }) => (
+          <span className="text-[13px] text-muted-foreground">
+            {row.original.shift_name || "—"}
           </span>
         ),
       },
@@ -99,6 +92,19 @@ export function useAssignmentColumns({
             </span>
           );
         },
+      },
+      {
+        accessorKey: "duty_date",
+        header: "Tanggal Tugas",
+        cell: ({ row }) => (
+          <span className="text-muted-foreground text-[13px]">
+            {row.original.duty_date
+              ? format(parseISO(row.original.duty_date), "dd MMM yyyy", {
+                  locale: localeId,
+                })
+              : "—"}
+          </span>
+        ),
       },
       {
         id: "actions",

@@ -35,6 +35,7 @@ export interface IHeartbeatLocation {
 }
 
 export interface IPatrolLogs {
+  _id: string;
   tenant_id: string;
   shift_id: string;
   user_id: string;
